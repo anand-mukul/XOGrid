@@ -29,7 +29,6 @@ const gameSchema = mongoose.Schema({
     timestamps: true
 });
 
-// Index for efficient player game lookups (PERF-006)
 gameSchema.index({ players: 1, createdAt: -1 });
 
 const Game = mongoose.model('Game', gameSchema);

@@ -42,14 +42,13 @@ const Home = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
-    const searchAbortRef = useRef(null); // PERF-005
+    const searchAbortRef = useRef(null);
 
     // Duel State
     const [isSearchingDuel, setIsSearchingDuel] = useState(false);
     const [showDuelAnimation, setShowDuelAnimation] = useState(false);
     const [onlineCount, setOnlineCount] = useState(0);
 
-    // AI Difficulty (FEAT-001)
     const [showDifficultyPicker, setShowDifficultyPicker] = useState(false);
 
     const getStatusKeyword = () => {
@@ -63,7 +62,7 @@ const Home = () => {
         if (user && !user.isGuest) {
             loadSocialData();
         }
-    }, [user?._id]);  // PERF-004 fix: use stable user ID
+    }, [user?._id]);
 
     const loadSocialData = async () => {
         try {
@@ -77,7 +76,6 @@ const Home = () => {
         } catch (e) { /* silent */ }
     };
 
-    // PERF-005 fix: cancel stale search requests with AbortController
     useEffect(() => {
         if (!searchQuery.trim()) {
             setSearchResults([]);
@@ -485,7 +483,6 @@ const Home = () => {
                                             <ArrowRight className="w-4 h-4 shrink-0 text-text-muted group-hover:text-accent-rose group-hover:translate-x-0.5 transition-all" />
                                         </button>
 
-                                        {/* Play vs AI with Difficulty Picker (FEAT-001) */}
                                         <div className="relative">
                                             <button onClick={() => setShowDifficultyPicker(!showDifficultyPicker)}
                                                 className="cursor-pointer group w-full flex items-center gap-3 sm:gap-4 p-4 bg-surface-secondary/50 hover:bg-surface-secondary border border-border-subtle hover:border-accent-emerald/25 rounded-xl transition-all hover:shadow-lg hover:shadow-accent-emerald/5 active:scale-[0.98]">

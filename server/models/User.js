@@ -56,7 +56,6 @@ userSchema.index({ lastActive: 1 }, {
     partialFilterExpression: { isGuest: true }
 });
 
-// PERF-006: Indexes for common lookups
 userSchema.index({ username: 'text' });
 userSchema.index({ 'stats.wins': -1 }); // Leaderboard queries
 

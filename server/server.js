@@ -26,7 +26,6 @@ const allowedOrigins = process.env.CLIENT_URL
 // Security headers
 app.use(helmet({ contentSecurityPolicy: false }));
 
-// CORS — actually block unauthorized origins (BUG-002 fix)
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
@@ -70,7 +69,6 @@ app.get('/', (req, res) => {
     res.json({ status: 'ok', message: 'XOGrid API is running' });
 });
 
-// Enhanced health check (ARCH-008)
 app.get('/health', (req, res) => {
     const dbState = mongoose.connection.readyState;
     const dbStatus = dbState === 1 ? 'connected' : dbState === 2 ? 'connecting' : 'disconnected';
@@ -126,7 +124,6 @@ server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-// Graceful shutdown (FEAT-010)
 const shutdown = async (signal) => {
     console.log(`\n${signal} received. Shutting down gracefully...`);
 

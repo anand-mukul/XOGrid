@@ -6,7 +6,7 @@ const User = require('../models/User');
 const rooms = {};
 let matchmakingQueue = [];
 let matchmakingLock = false;
-const connectedUsers = new Set(); // MEM-003: track actual socket IDs
+const connectedUsers = new Set();
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const TURN_TIMEOUT_MS = 30000;
@@ -31,7 +31,6 @@ const validateMoveIndex = (index) => {
 
 /**
  * Shared cleanup logic for when a player disconnects or leaves.
- * Fixes LOGIC-005: DRY disconnect/leave code.
  */
 const handlePlayerLeave = (io, socket, userId, currentRoom) => {
     if (!currentRoom || !rooms[currentRoom]) return;
@@ -73,7 +72,6 @@ const sanitizeRoomForClient = (room) => {
 };
 
 /**
- * Start a server-side turn timer (SEC-006 fix).
  * When it expires, a random move is played for the current player.
  */
 const startTurnTimer = (io, roomId, room) => {
@@ -146,7 +144,6 @@ const triggerAIMove = (io, roomId, room, aiSymbol) => {
     }, 600);
 };
 
-// ── Room Cleanup Job (MEM-001) ───────────────────────────────────────────────
 setInterval(() => {
     const now = Date.now();
     for (const [id, room] of Object.entries(rooms)) {
@@ -173,17 +170,14 @@ const handleSocketConnection = (io) => {
         const user = socket.user;
         let currentRoom = null;
 
-        // MEM-003: Track connected sockets for accurate count
         connectedUsers.add(socket.id);
         io.emit('onlineCountUpdate', connectedUsers.size);
 
         // ── Matchmaking ──────────────────────────────────────────────────
         socket.on('findMatch', () => {
-            // RACE-001: Prevent concurrent queue mutations
             if (matchmakingLock) return;
             if (matchmakingQueue.some(p => p.userId === user.id)) return;
 
-            // MEM-004: Store only socket ID, not the socket object
             matchmakingQueue.push({ socketId: socket.id, userId: user.id });
 
             if (matchmakingQueue.length >= 2) {
@@ -222,7 +216,6 @@ const handleSocketConnection = (io) => {
                 return;
             }
 
-            // RACE-003: Leave previous room before joining new one
             if (currentRoom && currentRoom !== roomId && rooms[currentRoom]) {
                 handlePlayerLeave(io, socket, user.id, currentRoom);
             }
@@ -271,7 +264,6 @@ const handleSocketConnection = (io) => {
             const room = rooms[currentRoom];
             if (room.status !== 'playing') return;
 
-            // SEC-007: Validate move index
             if (!validateMoveIndex(index)) return;
 
             const player = room.players.find(p => p.id === user.id);
@@ -281,7 +273,6 @@ const handleSocketConnection = (io) => {
             room.board[index] = player.symbol;
             room.turn = player.symbol === 'X' ? 'O' : 'X';
 
-            // Store move (LOGIC-001 fix)
             if (!room.moves) room.moves = [];
             room.moves.push({ playerId: player.id, position: index, symbol: player.symbol, timestamp: Date.now() });
 
@@ -313,10 +304,8 @@ const handleSocketConnection = (io) => {
 
         // ── Timer Expired (kept for backward compat, but server is authoritative now)
         socket.on('timerExpired', () => {
-            // No-op: server handles timers now (SEC-006)
         });
 
-        // ── Rematch (RACE-004: requires both players to agree) ───────────
         socket.on('rematch', ({ roomId }) => {
             if (!rooms[roomId]) return;
             const room = rooms[roomId];
@@ -331,7 +320,6 @@ const handleSocketConnection = (io) => {
                 return;
             }
 
-            // PvP: require both votes (RACE-004 fix)
             if (!room.rematchVotes) room.rematchVotes = new Set();
             room.rematchVotes.add(user.id);
 
@@ -345,7 +333,6 @@ const handleSocketConnection = (io) => {
             }
         });
 
-        // ── Chat (SEC-004/005 fix) ───────────────────────────────────────
         socket.on('chatMessage', (msg) => {
             if (!currentRoom || !rooms[currentRoom]) return;
             if (rooms[currentRoom].mode === 'pve') return;
@@ -355,7 +342,6 @@ const handleSocketConnection = (io) => {
 
             const message = { username: user.username, text: sanitized, time: new Date() };
 
-            // MEM-002: Cap chat messages
             if (rooms[currentRoom].chatMessages.length >= MAX_CHAT_MESSAGES) {
                 rooms[currentRoom].chatMessages.shift();
             }
@@ -429,7 +415,6 @@ const saveGameToDB = async (room) => {
 
         const isAI = room.mode === 'pve';
 
-        // Save game document for PvP games (LOGIC-001: include moves)
         if (!isAI) {
             const game = new Game({
                 players: [p1.id, p2.id],
@@ -447,7 +432,6 @@ const saveGameToDB = async (room) => {
             await game.save();
         }
 
-        // RACE-002 fix: Use atomic MongoDB operations for stats
         for (const hp of humanPlayers) {
             const won = room.winner === hp.symbol;
             const draw = room.winner === 'Tie';

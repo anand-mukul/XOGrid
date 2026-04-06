@@ -10,7 +10,6 @@ export const SocketProvider = ({ children }) => {
     const socketRef = useRef(null);
 
     useEffect(() => {
-        // PERF-001 fix: depend on user.token, not the entire user object
         const token = user?.token;
 
         if (token) {

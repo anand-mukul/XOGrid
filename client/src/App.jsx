@@ -16,7 +16,6 @@ const Loader = () => (
     </div>
 );
 
-// FEAT-008: Error Boundary to prevent white screen crashes
 class ErrorBoundary extends Component {
     constructor(props) {
         super(props);

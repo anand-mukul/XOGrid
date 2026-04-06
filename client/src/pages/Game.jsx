@@ -56,8 +56,8 @@ const Game = () => {
     const [lastResult, setLastResult] = useState(null);
     const [reactionCooldown, setReactionCooldown] = useState(false);
     const [rematchPending, setRematchPending] = useState(false);
+    const [opponentRequestedRematch, setOpponentRequestedRematch] = useState(false);
 
-    // BUG-004: Null guard
     const userId = user?._id;
     const username = user?.username;
     const userAvatar = user?.avatar;
@@ -66,7 +66,6 @@ const Game = () => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [chat]);
 
-    // LOGIC-006 fix: Timer now relies on server authority. Client timer is purely visual.
     useEffect(() => {
         if (gameState?.status === 'playing') {
             setTimerValue(100);
@@ -76,7 +75,6 @@ const Game = () => {
             timerRef.current = setInterval(() => {
                 setTimerValue(prev => {
                     const next = prev - step;
-                    // LOGIC-006 fix: Never emit timerExpired — server handles it now
                     return Math.max(0, next);
                 });
             }, 150);
@@ -127,6 +125,7 @@ const Game = () => {
                 if (prev && (prev.status === 'ended' || prev.status === 'abandoned') && state.status === 'playing') {
                     setLastResult(null);
                     setRematchPending(false);
+                    setOpponentRequestedRematch(false);
                 }
                 return state;
             });
@@ -146,7 +145,7 @@ const Game = () => {
         };
 
         const handleRematchRequested = ({ username: requester }) => {
-            setRematchPending(true);
+            setOpponentRequestedRematch(true);
         };
 
         socket.on('gameState', handleGameState);
@@ -171,7 +170,6 @@ const Game = () => {
     };
 
     const handleRematch = () => {
-        setLastResult(null);
         setRematchPending(true);
         socket.emit('rematch', { roomId });
     };
@@ -221,7 +219,6 @@ const Game = () => {
         }
     };
 
-    // BUG-004: Guard against null user
     if (!user) {
         navigate('/');
         return null;
@@ -520,14 +517,27 @@ const Game = () => {
                                     >
                                         <div className="bg-[#0f131f] border border-[#1b1f2c] p-4 sm:p-5 rounded-2xl w-[90%] sm:w-auto min-w-[200px] text-center shadow-2xl pointer-events-auto">
                                             <div className="flex flex-col items-center justify-center gap-3">
-                                                <button onClick={handleRematch} disabled={rematchPending && !isPVE}
-                                                    className="w-full cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 flex justify-center items-center gap-2 px-6 py-3 bg-gradient-to-r from-accent-cyan/20 to-accent-cyan/10 hover:from-accent-cyan/30 hover:to-accent-cyan/20 text-accent-cyan rounded-xl transition-all text-sm font-semibold active:scale-95">
-                                                    <RotateCcw className="w-4 h-4" />
-                                                    {rematchPending && !isPVE ? 'Waiting...' : 'Rematch'}
+                                                {gameState.status !== 'abandoned' && (
+                                                    <button onClick={handleRematch} disabled={rematchPending && !isPVE}
+                                                        className="w-full cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 flex justify-center items-center gap-2 px-6 py-3 bg-gradient-to-r from-accent-cyan/20 to-accent-cyan/10 hover:from-accent-cyan/30 hover:to-accent-cyan/20 text-accent-cyan rounded-xl transition-all text-sm font-semibold active:scale-95">
+                                                        <RotateCcw className="w-4 h-4" />
+                                                        {rematchPending && !isPVE 
+                                                            ? 'Waiting...' 
+                                                            : opponentRequestedRematch 
+                                                                ? 'Accept Rematch' 
+                                                                : 'Rematch'}
+                                                    </button>
+                                                )}
+                                                <button onClick={() => { socket?.emit('leaveRoom'); navigate('/'); }}
+                                                    className="w-full cursor-pointer flex justify-center items-center gap-2 px-6 py-3 bg-[#1b1f2c] hover:bg-[#262a37] text-text-secondary rounded-xl transition-all text-sm font-semibold active:scale-95">
+                                                    Find Another
                                                 </button>
                                             </div>
-                                            {rematchPending && !isPVE && (
+                                            {gameState.status !== 'abandoned' && rematchPending && !isPVE && (
                                                 <p className="text-[10px] text-text-muted mt-3 animate-pulse">Waiting for opponent to accept...</p>
+                                            )}
+                                            {gameState.status !== 'abandoned' && opponentRequestedRematch && !rematchPending && !isPVE && (
+                                                <p className="text-[10px] text-accent-emerald mt-3 animate-pulse">Opponent wants to rematch!</p>
                                             )}
                                         </div>
                                     </motion.div>

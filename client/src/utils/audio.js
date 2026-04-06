@@ -1,4 +1,3 @@
-// BUG-003 fix: Lazy-init AudioContext to avoid SSR crashes and browser autoplay restrictions
 let audioCtx = null;
 
 const getAudioCtx = () => {

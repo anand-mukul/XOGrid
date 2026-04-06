@@ -127,7 +127,6 @@ const googleLogin = async (req, res) => {
             return res.status(400).json({ message: 'No credentials provided' });
         }
 
-        // SEC-008: Prevent account takeover via email match
         let user = await User.findOne({ googleId });
 
         if (!user && email) {

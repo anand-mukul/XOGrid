@@ -11,7 +11,6 @@ const SlideToGoogleAuth = ({ onLoginSuccess, onLoginError, isLoading }) => {
     const controls = useAnimation();
     const [maxSlide, setMaxSlide] = useState(200);
 
-    // LOGIC-007 fix: Use ResizeObserver instead of ref in useEffect deps
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
