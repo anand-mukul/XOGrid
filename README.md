@@ -1,4 +1,8 @@
-# XOGrid
+<div align="center">
+  <img src="client/public/logo.png" alt="XOGrid Logo" width="120" />
+</div>
+
+<h1 align="center">XOGrid</h1>
 
 > Real-time multiplayer Tic-Tac-Toe with AI, friends, and competitive scoring — built with React, Node.js, Socket.IO, and MongoDB.
 

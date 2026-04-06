@@ -156,9 +156,7 @@ const Home = () => {
             <div className="relative min-h-screen flex flex-col">
                 <nav className="relative z-30 flex items-center justify-between px-6 py-4">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-cyan to-accent-violet flex items-center justify-center">
-                            <Hash className="w-4 h-4 text-white" strokeWidth={3} />
-                        </div>
+                        <img src="/logo.png" alt="XOGrid" className="w-8 h-8 object-contain" />
                         <span className="text-lg font-display font-bold text-text-primary tracking-tight">XOGrid</span>
                     </div>
                     {user && (
@@ -470,9 +468,9 @@ const Home = () => {
 
             <div className="relative z-10 py-8 px-6 border-t border-border-subtle">
                 <div className="max-w-5xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Hash className="w-4 h-4 text-text-muted" />
-                        <span className="text-text-muted text-xs">XOGrid</span>
+                    <div className="flex items-center gap-2.5">
+                        <img src="/logo.png" alt="XOGrid" className="w-4 h-4 object-contain opacity-50 grayscale" />
+                        <span className="text-text-muted text-xs font-semibold">XOGrid</span>
                     </div>
                     <p className="text-text-muted text-xs">Built with ❤ for competitive gaming</p>
                 </div>

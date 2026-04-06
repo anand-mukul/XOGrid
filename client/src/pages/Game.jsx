@@ -231,7 +231,7 @@ const Game = () => {
                 <button onClick={() => navigate('/')} className="flex items-center gap-2 px-3 py-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-[#1b1f2c] transition-all text-sm">
                     <ArrowLeft className="w-4 h-4" />
                     <div className="hidden sm:flex items-center gap-1.5">
-                        <Hash className="w-3.5 h-3.5 text-accent-cyan" />
+                        <img src="/logo.png" alt="XOGrid" className="w-4 h-4 object-contain" />
                         <span className="font-semibold text-text-primary text-xs">XOGrid</span>
                     </div>
                 </button>
