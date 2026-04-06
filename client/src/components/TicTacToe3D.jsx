@@ -169,9 +169,9 @@ export default function TicTacToe3D() {
         <div className="w-full h-full absolute inset-0 pointer-events-none overflow-hidden">
             <Canvas
                 camera={{ position: [3.2, 3.8, 3.2], fov: 28 }}
-                gl={{ antialias: true, alpha: true }}
+                gl={{ antialias: false, alpha: true, powerPreference: 'low-power' }}
                 style={{ background: 'transparent' }}
-                dpr={[1, 1.5]}
+                dpr={[1, Math.min(window.devicePixelRatio, 1.5)]}
             >
                 <Scene />
             </Canvas>

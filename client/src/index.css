@@ -30,6 +30,18 @@
 }
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--color-surface-primary);
     color: var(--color-text-primary);
@@ -37,11 +49,22 @@
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
+    /* Safe area for notched phones */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 
   ::selection {
     background: rgba(34, 211, 238, 0.3);
     color: white;
+  }
+
+  /* Smooth focus style for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--color-accent-cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }
 

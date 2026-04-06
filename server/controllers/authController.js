@@ -98,24 +98,58 @@ const guestLogin = async (req, res) => {
 };
 
 const googleLogin = async (req, res) => {
-    const { credential } = req.body;
+    const { credential, accessToken } = req.body;
 
     try {
-        const ticket = await googleClient.verifyIdToken({
-            idToken: credential,
-            audience: process.env.GOOGLE_CLIENT_ID,
-        });
+        let googleId, email, name, picture;
 
-        const payload = ticket.getPayload();
-        const { sub: googleId, email, name, picture } = payload;
+        if (credential) {
+            const ticket = await googleClient.verifyIdToken({
+                idToken: credential,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+            const payload = ticket.getPayload();
+            googleId = payload.sub;
+            email = payload.email;
+            name = payload.name;
+            picture = payload.picture;
+        } else if (accessToken) {
+            const resp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            if (!resp.ok) throw new Error('Invalid access token');
+            const data = await resp.json();
+            googleId = data.sub;
+            email = data.email;
+            name = data.name;
+            picture = data.picture;
+        } else {
+            return res.status(400).json({ message: 'No credentials provided' });
+        }
 
-        let user = await User.findOne({ $or: [{ googleId }, { email }] });
+        // SEC-008: Prevent account takeover via email match
+        let user = await User.findOne({ googleId });
+
+        if (!user && email) {
+            const emailUser = await User.findOne({ email });
+            if (emailUser) {
+                // Only link if the account doesn't have a password (not email/password registered)
+                if (!emailUser.password) {
+                    emailUser.googleId = googleId;
+                    emailUser.avatar = picture || emailUser.avatar;
+                    emailUser.lastActive = new Date();
+                    await emailUser.save();
+                    user = emailUser;
+                } else {
+                    // Email belongs to a password-registered account; don't auto-link
+                    return res.status(409).json({
+                        message: 'An account with this email already exists. Please sign in with your password.'
+                    });
+                }
+            }
+        }
 
         if (user) {
-            if (!user.googleId) {
-                user.googleId = googleId;
-                user.avatar = picture || user.avatar;
-            }
             user.lastActive = new Date();
             await user.save();
         } else {
@@ -282,6 +316,41 @@ const removeFriend = async (req, res) => {
     }
 };
 
+const searchUsers = async (req, res) => {
+    const { q } = req.query;
+    if (!q || q.length < 2) return res.json([]);
+
+    try {
+        const users = await User.find({
+            username: { $regex: q, $options: 'i' },
+            _id: { $ne: req.user._id },
+            isGuest: { $ne: true }
+        })
+        .limit(10)
+        .select('username avatar stats currentStreak friendRequests');
+
+        const currentUser = await User.findById(req.user._id);
+
+        const results = users.map(u => {
+            const isFriend = currentUser.friends.some(f => f.toString() === u._id.toString());
+            const hasPendingRequest = u.friendRequests && u.friendRequests.some(r => r.from.toString() === req.user._id.toString());
+            return {
+                _id: u._id,
+                username: u.username,
+                avatar: u.avatar,
+                stats: u.stats,
+                currentStreak: u.currentStreak,
+                isFriend,
+                hasPendingRequest
+            };
+        });
+
+        res.json(results);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     authUser,
     registerUser,
@@ -293,4 +362,5 @@ module.exports = {
     respondFriendRequest,
     getFriends,
     removeFriend,
+    searchUsers,
 };
