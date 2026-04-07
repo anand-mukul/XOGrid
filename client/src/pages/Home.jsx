@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import api from '../services/api';
 import { useSocket } from '../context/SocketContext';
 import { Swords, Bot, Hash, ArrowRight, Zap, LogOut, Users, Shield, Wifi, ChevronDown, Mail, Lock, User, UserPlus, Trophy, TrendingUp, UserCheck, UserX, Clock, X, Search, Loader2, Gamepad2 } from 'lucide-react';
 import TicTacToe3D from '../components/TicTacToe3D';
 import DuelAnimation from '../components/DuelAnimation';
 import SlideToGoogleAuth from '../components/SlideToGoogleAuth';
+import PlayVsAIButton from '../components/PlayVsAIButton';
 
 const FEATURES = [
     { icon: Wifi, title: "Real-time Sync", desc: "Instant move sync via WebSockets" },
@@ -48,8 +49,6 @@ const Home = () => {
     const [isSearchingDuel, setIsSearchingDuel] = useState(false);
     const [showDuelAnimation, setShowDuelAnimation] = useState(false);
     const [onlineCount, setOnlineCount] = useState(0);
-
-    const [showDifficultyPicker, setShowDifficultyPicker] = useState(false);
 
     const getStatusKeyword = () => {
         if (onlineCount >= 10) return "HOT";
@@ -483,44 +482,7 @@ const Home = () => {
                                             <ArrowRight className="w-4 h-4 shrink-0 text-text-muted group-hover:text-accent-rose group-hover:translate-x-0.5 transition-all" />
                                         </button>
 
-                                        <div className="relative">
-                                            <button onClick={() => setShowDifficultyPicker(!showDifficultyPicker)}
-                                                className="cursor-pointer group w-full flex items-center gap-3 sm:gap-4 p-4 bg-surface-secondary/50 hover:bg-surface-secondary border border-border-subtle hover:border-accent-emerald/25 rounded-xl transition-all hover:shadow-lg hover:shadow-accent-emerald/5 active:scale-[0.98]">
-                                                <div className="w-10 h-10 shrink-0 rounded-lg bg-accent-emerald/10 flex items-center justify-center group-hover:bg-accent-emerald/20 transition">
-                                                    <Bot className="w-5 h-5 text-accent-emerald" />
-                                                </div>
-                                                <div className="flex-1 text-left min-w-0">
-                                                    <p className="font-semibold text-text-primary text-sm">Play vs AI</p>
-                                                    <p className="text-text-muted text-xs">Choose difficulty</p>
-                                                </div>
-                                                <ChevronDown className={`w-4 h-4 shrink-0 text-text-muted transition-transform ${showDifficultyPicker ? 'rotate-180' : ''}`} />
-                                            </button>
-
-                                            <AnimatePresence>
-                                                {showDifficultyPicker && (
-                                                    <motion.div
-                                                        initial={{ height: 0, opacity: 0 }}
-                                                        animate={{ height: 'auto', opacity: 1 }}
-                                                        exit={{ height: 0, opacity: 0 }}
-                                                        transition={{ duration: 0.2 }}
-                                                        className="overflow-hidden"
-                                                    >
-                                                        <div className="flex gap-2 pt-2">
-                                                            {DIFFICULTY_OPTIONS.map(d => (
-                                                                <button
-                                                                    key={d.key}
-                                                                    onClick={() => { setShowDifficultyPicker(false); joinRoom('pve', d.key); }}
-                                                                    className="cursor-pointer flex-1 p-3 bg-surface-secondary/80 hover:bg-surface-elevated border border-border-subtle hover:border-accent-emerald/20 rounded-xl transition-all active:scale-95 text-center"
-                                                                >
-                                                                    <p className="text-sm font-semibold text-text-primary">{d.label}</p>
-                                                                    <p className="text-[10px] text-text-muted mt-0.5">{d.desc}</p>
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </div>
+                                        <PlayVsAIButton onSelectDifficulty={(difficulty) => joinRoom('pve', difficulty)} />
 
                                         {error && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-accent-rose text-sm">{error}</motion.p>}
                                     </motion.div>

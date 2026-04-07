@@ -57,7 +57,7 @@ userSchema.index({ lastActive: 1 }, {
 });
 
 userSchema.index({ username: 'text' });
-userSchema.index({ 'stats.wins': -1 }); // Leaderboard queries
+userSchema.index({ 'stats.wins': -1 }); 
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
     if (!this.password) return false;

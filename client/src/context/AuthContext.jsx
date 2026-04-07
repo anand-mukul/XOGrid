@@ -9,17 +9,22 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const fetchUser = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                try {
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
                     const { data } = await api.get('/auth/profile');
                     setUser({ ...data, token });
-                } catch (err) {
-                    console.error(err);
-                    localStorage.removeItem('token');
                 }
+            } catch (err) {
+                console.error('Auth error:', err);
+                try {
+                    localStorage.removeItem('token');
+                } catch (e) {
+                    // Ignore localStorage error
+                }
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
         fetchUser();
     }, []);
@@ -36,7 +41,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ user, login, logout, loading }}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };
