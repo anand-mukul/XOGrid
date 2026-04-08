@@ -16,10 +16,10 @@ const PlayVsAIButton = ({ onSelectDifficulty }) => {
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: showDifficultyPicker ? 0.15 : 0 }}
                 style={{ width: "calc(40% - 6px)" }}
                 onClick={() => { setShowDifficultyPicker(false); onSelectDifficulty('hard'); }}
-                className="absolute top-0 bottom-0 z-10 cursor-pointer flex flex-col items-center justify-center rounded-xl border border-border-subtle bg-surface-secondary/80 hover:bg-surface-elevated hover:border-accent-emerald/30 outline-none transition-colors overflow-hidden whitespace-nowrap"
+                className="absolute top-0 bottom-0 z-10 cursor-pointer flex flex-col items-center justify-center rounded-xl border border-border-subtle bg-surface-secondary/80 hover:bg-surface-elevated hover:border-accent-rose/30 outline-none transition-colors overflow-hidden whitespace-nowrap"
             >
-                <p className="text-sm font-semibold text-text-primary">Hard</p>
-                <p className="text-[10px] text-text-muted mt-0.5">Unbeatable AI</p>
+                <p className="text-sm font-semibold text-accent-rose">Impossible</p>
+                <p className="text-[10px] text-text-muted mt-0.5">Flawless AI</p>
             </motion.button>
 
             {/* MEDIUM BUTTON (z-20) */}
@@ -31,10 +31,10 @@ const PlayVsAIButton = ({ onSelectDifficulty }) => {
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: showDifficultyPicker ? 0.25 : 0 }}
                 style={{ width: "calc(35% - 5px)" }}
                 onClick={() => { setShowDifficultyPicker(false); onSelectDifficulty('medium'); }}
-                className="absolute top-0 bottom-0 z-20 cursor-pointer flex flex-col items-center justify-center rounded-xl border border-border-subtle bg-surface-secondary/80 hover:bg-surface-elevated hover:border-accent-emerald/30 outline-none transition-colors overflow-hidden whitespace-nowrap"
+                className="absolute top-0 bottom-0 z-20 cursor-pointer flex flex-col items-center justify-center rounded-xl border border-border-subtle bg-surface-secondary/80 hover:bg-surface-elevated hover:border-amber-400/30 outline-none transition-colors overflow-hidden whitespace-nowrap"
             >
-                <p className="text-sm font-semibold text-text-primary">Medium</p>
-                <p className="text-[10px] text-text-muted mt-0.5">Some strategy</p>
+                <p className="text-sm font-semibold text-amber-400">Pro</p>
+                <p className="text-[10px] text-text-muted mt-0.5">Smart moves</p>
             </motion.button>
 
             {/* MAIN TOGGLE BUTTON (z-30) */}
